@@ -15,3 +15,9 @@ async def index():
     return {"Message": "This is Index"}
 
 
+@app.post("/predictimage")
+async def UploadImage(file: bytes = File(...)):
+    with open('image.jpg','wb') as image:
+        image.write(file)
+        image.close()
+    return 'got it'
