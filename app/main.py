@@ -1,6 +1,8 @@
 import tensorflow as tf
 
 from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from tensorflow.keras import preprocessing
 from PIL import Image
@@ -33,6 +35,11 @@ async def UploadImage(file: bytes = File(...)):
         predictions = MODEL.predict(test_image)
         scores = tf.nn.softmax(predictions[0])
         scores = scores.numpy()
+
+        class_name = class_names[np.argmax(scores)]
+        confidence = (100 * np.max(scores)).round(2)
+        response = jsonable_encoder({"class_name": class_name, "confidence": confidence})
+        print(response)
         image.close()
-    
-    return f"{class_names[np.argmax(scores)]} with a { (100 *       np.max(scores)).round(2) } % confidence."
+
+    return JSONResponse(content=response)
